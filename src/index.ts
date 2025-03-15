@@ -3,10 +3,13 @@ import { z } from "@hono/zod-openapi";
 import { describeRoute, generateSpecs, openAPISpecs } from "hono-openapi";
 import { resolver, validator as zValidator } from "hono-openapi/zod";
 
+export interface Env {
+  DB: D1Database;
+}
 
-const app = new Hono();
+const app = new Hono<{Bindings: Env}>();
 
-const responseSchema = z.string().openapi({ example: "Hello Steven!" });
+const responseSchema = z.object({tasks: z.array(z.string())});
 
 app.get(
   "/",
@@ -23,8 +26,12 @@ app.get(
       },
     },
   }),
-  (c) => {
-    return c.text("Hello World!");
+  async (c) => {
+    const { results } = await c.env.DB.prepare(
+      "SELECT * FROM `todo-tasks` WHERE 1;",
+    ).all();
+
+    return c.json({ tasks: results });
   }
 );
 
