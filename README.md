@@ -1,1 +1,8 @@
-# trip_bazaar_backend
+```
+npm install
+npm run dev
+```
+
+```
+npm run deploy
+```
