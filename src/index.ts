@@ -4,7 +4,10 @@ import { describeRoute, generateSpecs, openAPISpecs } from "hono-openapi";
 import { resolver, validator as zValidator } from "hono-openapi/zod";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { tasksTable } from "./db/schema";
+import { toursTable } from "./db/schema";
+import { Tour } from "./db/types";
+import { createSelectSchema } from "drizzle-zod";
+
 
 export type Env = {
   DATABASE_URL: string;
@@ -12,7 +15,7 @@ export type Env = {
 
 const app = new Hono<{Bindings: Env}>();
 
-const responseSchema = z.object({tasks: z.array(z.string())});
+const responseSchema = z.object({tours: z.array(createSelectSchema(toursTable))});
 
 app.get(
   "/",
@@ -33,9 +36,9 @@ app.get(
     const sql = neon(c.env.DATABASE_URL);
     const db = drizzle(sql);
 
-    const allTasks = await db.select().from(tasksTable)
+    const allTasks: Tour[] = await db.select().from(toursTable)
     
-    return c.json({ tasks: allTasks });
+    return c.json({ tours: allTasks });
   }
 );
 
