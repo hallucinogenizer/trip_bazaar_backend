@@ -2,9 +2,12 @@ import { Hono } from "hono";
 import { z } from "@hono/zod-openapi";
 import { describeRoute, generateSpecs, openAPISpecs } from "hono-openapi";
 import { resolver, validator as zValidator } from "hono-openapi/zod";
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+import { tasksTable } from "./db/schema";
 
-export interface Env {
-  DB: D1Database;
+export type Env = {
+  DATABASE_URL: string;
 }
 
 const app = new Hono<{Bindings: Env}>();
@@ -27,11 +30,12 @@ app.get(
     },
   }),
   async (c) => {
-    const { results } = await c.env.DB.prepare(
-      "SELECT * FROM `todo-tasks` WHERE 1;",
-    ).all();
+    const sql = neon(c.env.DATABASE_URL);
+    const db = drizzle(sql);
 
-    return c.json({ tasks: results });
+    const allTasks = await db.select().from(tasksTable)
+    
+    return c.json({ tasks: allTasks });
   }
 );
 

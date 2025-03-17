@@ -2,11 +2,15 @@
   "name": "trip_bazaar_backend",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify"
+    "deploy": "wrangler deploy --minify",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx ./src/db/migrate.ts"
   },
   "dependencies": {
     "@hono/zod-openapi": "^0.19.2",
     "@hono/zod-validator": "^0.4.3",
+    "@neondatabase/serverless": "^0.10.4",
+    "drizzle-orm": "^0.40.0",
     "hono": "^4.7.4",
     "hono-openapi": "^0.4.6",
     "zod": "^3.24.2",
@@ -15,6 +19,9 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250214.0",
     "@types/node": "^22.13.10",
+    "dotenv": "^16.4.7",
+    "drizzle-kit": "^0.30.5",
+    "tsx": "^4.19.3",
     "wrangler": "^4.0.0"
   }
 }
