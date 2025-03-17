@@ -1,7 +1,7 @@
 import { boolean, date, integer, pgTable, timestamp, varchar, text, unique, pgTableCreator } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-export const primaryDestinationsTable = pgTable("primary_destinations", {
+export const locationsTable = pgTable("locations", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),
   description: varchar({ length: 255 }).notNull(),
@@ -21,7 +21,7 @@ export const toursTable = pgTable("tours", {
   images: varchar({ length: 255 }).notNull(),
   start_date: date("start_date"),
   start_date_time: timestamp("start_date_time"),
-  start_location_id: integer("start_location_id").references(() => primaryDestinationsTable.id, { onDelete: "restrict" }),
+  start_location_id: integer("start_location_id").references(() => locationsTable.id, { onDelete: "restrict" }),
   end_date: date("end_date"),
   end_date_time: timestamp("end_date_time"),
   created_at: timestamp("created_at").defaultNow(),
@@ -34,7 +34,7 @@ export const tourPrimaryDestinationsTable = pgTable(
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     tour_id: integer("tour_id").notNull().references(() => toursTable.id, { onDelete: "restrict" }),
-    primary_destination_id: integer("primary_destination_id").notNull().references(() => primaryDestinationsTable.id, { onDelete: "restrict" }),
+    primary_destination_id: integer("primary_destination_id").notNull().references(() => locationsTable.id, { onDelete: "restrict" }),
     created_at: timestamp("created_at").defaultNow()
   }
 );
@@ -45,22 +45,22 @@ export const tourSecondaryDestinationsTable = pgTable(
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     tour_id: integer("tour_id").notNull().references(() => toursTable.id, { onDelete: "restrict" }),
-    secondary_destination_id: integer("secondary_destination_id").notNull().references(() => primaryDestinationsTable.id, { onDelete: "restrict" }),
+    secondary_destination_id: integer("secondary_destination_id").notNull().references(() => locationsTable.id, { onDelete: "restrict" }),
     created_at: timestamp("created_at").defaultNow()
   }
 );
 
 // Define relations between tables
-export const primaryDestinationsRelations = relations(primaryDestinationsTable, ({ many }) => ({
+export const primaryDestinationsRelations = relations(locationsTable, ({ many }) => ({
   tours: many(toursTable, { relationName: "start_location_tours" }),
   tour_primary_destinations: many(tourPrimaryDestinationsTable, { relationName: "primary_destination_tours" }),
   tour_secondary_destinations: many(tourSecondaryDestinationsTable, { relationName: "secondary_destination_tours" })
 }));
 
 export const toursRelations = relations(toursTable, ({ one, many }) => ({
-  start_location: one(primaryDestinationsTable, {
+  start_location: one(locationsTable, {
     fields: [toursTable.start_location_id],
-    references: [primaryDestinationsTable.id],
+    references: [locationsTable.id],
     relationName: "start_location_tours"
   }),
   primary_destinations: many(tourPrimaryDestinationsTable, { relationName: "tour_primary_destinations" }),
@@ -73,9 +73,9 @@ export const tourPrimaryDestinationsRelations = relations(tourPrimaryDestination
     references: [toursTable.id],
     relationName: "tour_primary_destinations"
   }),
-  primary_destination: one(primaryDestinationsTable, {
+  primary_destination: one(locationsTable, {
     fields: [tourPrimaryDestinationsTable.primary_destination_id],
-    references: [primaryDestinationsTable.id],
+    references: [locationsTable.id],
     relationName: "primary_destination_tours"
   })
 }));
@@ -86,9 +86,9 @@ export const tourSecondaryDestinationsRelations = relations(tourSecondaryDestina
     references: [toursTable.id],
     relationName: "tour_secondary_destinations"
   }),
-  secondary_destination: one(primaryDestinationsTable, {
+  secondary_destination: one(locationsTable, {
     fields: [tourSecondaryDestinationsTable.secondary_destination_id],
-    references: [primaryDestinationsTable.id],
+    references: [locationsTable.id],
     relationName: "secondary_destination_tours"
   })
 }));
