@@ -4,11 +4,10 @@ import { relations } from "drizzle-orm";
 export const locationsTable = pgTable("locations", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),
-  description: varchar({ length: 255 }).notNull(),
+  description: varchar({ length: 255 }),
   featured_image_url: varchar({ length: 255 }).notNull(),
   additional_image_urls: text("additional_image_urls").array(),
   created_at: timestamp("created_at").defaultNow(),
-  updated_at: timestamp("updated_at").defaultNow()
 });
 
 export const toursTable = pgTable("tours", {
